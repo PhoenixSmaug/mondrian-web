@@ -30,6 +30,15 @@ function App() {
   const [deleteLetter, setDeleteLetter] = useState(null); // for delete popup
   const [clearRectangle, setClearRectangle] = useState(null); // for external clearing
   const [showResetModal, setShowResetModal] = useState(false); // modal for grid reset
+  // Mobile warning modal
+  const [showMobileWarning, setShowMobileWarning] = useState(false);
+
+  useEffect(() => {
+    // Show warning if width <= 800px (mobile/tablet)
+    if (window.innerWidth <= 800) {
+      setShowMobileWarning(true);
+    }
+  }, []);
 
   // Reset everything on grid size change
   useEffect(() => {
@@ -244,6 +253,18 @@ function App() {
   const smallestDefect = SMALLEST_DEFECT[gridSize] !== undefined ? SMALLEST_DEFECT[gridSize] : '-';
   return (
     <div className="container">
+      {showMobileWarning && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <p>
+              This website is designed for mouse use. For the best experience, please visit on a desktop device.
+            </p>
+            <div className="modal-buttons">
+              <button className="confirm" onClick={() => setShowMobileWarning(false)}>OK</button>
+            </div>
+          </div>
+        </div>
+      )}
       <h1 style={{ fontSize: '2.3em'}}>Mondrian Art Problem</h1>
       <h2 style={{ fontSize: '1.6em', fontWeight: 600, margin: '1.2em auto 0 auto', maxWidth: 600, color: '#222', textAlign: 'center', marginBottom: '0.7em' }}>How to Play</h2>
       <div className="rules" style={{ background: '#f6f6f6', borderRadius: 10, padding: '0.8em 1.2em', margin: '0.5em auto 0 auto', maxWidth: 600 }}>
