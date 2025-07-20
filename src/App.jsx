@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {isMobile} from 'react-device-detect';
 import MondrianGrid from './MondrianGrid';
 import './App.css';
 
@@ -34,8 +35,7 @@ function App() {
   const [showMobileWarning, setShowMobileWarning] = useState(false);
 
   useEffect(() => {
-    // Show warning if width <= 800px (mobile/tablet)
-    if (window.innerWidth <= 800) {
+    if (isMobile) {
       setShowMobileWarning(true);
     }
   }, []);
