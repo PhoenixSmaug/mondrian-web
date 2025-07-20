@@ -1,0 +1,250 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+  background: #f5f5f5;
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.container {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  max-width: 800px;
+  width: 100%;
+}
+
+.game-area {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.slider-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 0;
+  margin-top: 30px;
+}
+
+#grid-size-slider {
+  width: 300px;
+  margin-bottom: 8px;
+}
+
+.slider-label {
+  font-size: 1em;
+  color: #444;
+  margin-top: 0;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  padding: 32px 28px 24px 28px;
+  border-radius: 12px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+  min-width: 280px;
+  text-align: center;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.modal button.confirm {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  padding: 8px 22px;
+  border-radius: 5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.modal button.confirm:hover {
+  background: #1256a3;
+}
+
+.modal button.cancel {
+  background: #eee;
+  color: #333;
+  border: none;
+  padding: 8px 22px;
+  border-radius: 5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.modal button.cancel:hover {
+  background: #ccc;
+}
+
+.letter-grid {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  grid-template-rows: repeat(2, 40px);
+  gap: 10px;
+  margin-bottom: 28px;
+  justify-items: center;
+}
+
+.letter-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 7px;
+  color: #fff;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: transform 0.1s, box-shadow 0.1s;
+  outline: none;
+}
+
+.letter-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+}
+
+.undo-btn-container {
+  position: fixed;
+  left: 32px;
+  bottom: 32px;
+  z-index: 1100;
+}
+
+.action-btn {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: #f5f5f5;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: box-shadow 0.15s, background 0.15s;
+  padding: 0;
+  position: relative;
+  top: -6px; /* adjust as needed for vertical centering with slider */
+}
+
+.action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.action-btn svg {
+  display: block;
+}
+
+.controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2em;
+  margin-top: 1.5em;
+  position: relative;
+}
+
+.slider-area {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+
+.congruent-modal {
+  text-align: center;
+}
+
+.congruent-warning-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 1.15em;
+  margin-bottom: 18px;
+}
+
+.congruent-warning-bold {
+  font-weight: bold;
+  margin-right: 6px;
+}
+
+.congruent-rect-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  color: #fff;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin: 0 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  border: none;
+}
+
+.defect-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1.2em;
+  margin-bottom: 10px;
+  margin-top: 8px;
+}
+.defect-label {
+  font-weight: 500;
+  color: #333;
+}
+.defect-value {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-left: 6px;
+}
+.defect-red {
+  color: #d32f2f !important;
+}
+.defect-green {
+  color: #388e3c !important;
+}
+.defect-separator {
+  margin: 0 10px;
+  color: #bbb;
+  font-weight: 400;
+}
+.defect-grey {
+  color: #888;
+}

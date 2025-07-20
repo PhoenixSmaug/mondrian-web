@@ -1,0 +1,40 @@
+.grid-container {
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #000;
+  box-sizing: border-box;
+  transition: background-color 0.2s;
+}
+
+.cell.selected {
+  background-color: #fffbe6 !important; /* very light yellow for selection */
+}
+
+.cell.marked {
+  /* override selection color if marked */
+  /* background set inline */
+}
+
+.cell-letter {
+  color: #fff;
+  font-size: 1.3em;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+}
