@@ -3,14 +3,28 @@ import {isMobile} from 'react-device-detect';
 import MondrianGrid from './MondrianGrid';
 import './App.css';
 
-// 26 highly distinct colors (Kelly's + extended)
+// 27 highly distinct colors (Kelly's + extended)
 const BUTTON_COLORS = [
-  "#FFB300", "#803E75", "#FF6800", "#A6BDD7", "#C10020", "#CEA262", "#817066", "#007D34", "#F6768E", "#00538A", "#FF7A5C", "#53377A", "#FF8E00", "#B32851", "#F4C800", "#7F180D", "#93AA00", "#593315", "#F13A13", "#232C16", "#00A1C2", "#A0A0A0", "#8F3931", "#1E90FF", "#FF1493", "#228B22", "#FF1493"
+  "#FFB300", "#803E75", "#FF6800", "#A6BDD7", "#C10020", "#CEA262", "#817066", "#007D34", "#F6768E", "#00538A", "#FF7A5C", "#53377A", "#FF8E00", "#B32851", "#F4C800", "#7F180D", "#93AA00", "#593315", "#F13A13", "#232C16", "#00A1C2", "#A0A0A0", "#8F3931", "#1E90FF", "#FF1493", "#228B22", "#FFD700"
 ];
 
+// Function to fetch smallest defect from solutions.txt
 // OEIS A276523 b-file (grid size -> smallest possible defect)
-const SMALLEST_DEFECT = {
-  3:2, 4:4, 5:4, 6:5, 7:5, 8:6, 9:6, 10:8, 11:6, 12:7, 13:8, 14:6, 15:8, 16:8, 17:8, 18:8, 19:8, 20:9, 21:9, 22:9, 23:8, 24:9, 25:10, 26:9, 27:10, 28:9, 29:9, 30:11, 31:11, 32:10, 33:12, 34:12, 35:11, 36:12, 37:11, 38:10, 39:11, 40:12
+const fetchSmallestDefect = async (gridSize) => {
+  try {
+    const response = await fetch(`${import.meta.env.BASE_URL}solutions.txt`);
+    const text = await response.text();
+    // Search for the line a(gridSize)=value
+    const regex = new RegExp(`^a\\(${gridSize}\\)=(\\d+)$`, 'm');
+    const match = text.match(regex);
+    if (match) {
+      return parseInt(match[1]);
+    }
+    return '-';
+  } catch (error) {
+    console.error('Error fetching solutions:', error);
+    return '-';
+  }
 };
 
 function App() {
@@ -33,12 +47,79 @@ function App() {
   const [showResetModal, setShowResetModal] = useState(false); // modal for grid reset
   // Mobile warning modal
   const [showMobileWarning, setShowMobileWarning] = useState(false);
+  const [smallestDefect, setSmallestDefect] = useState('-'); // smallest defect from file
+  // Solutions section
+  const [solutionSliderValue, setSolutionSliderValue] = useState(10);
+  const [solutionGridSize, setSolutionGridSize] = useState(10);
+  const [solutionInfo, setSolutionInfo] = useState({ type: '', defect: '', author: '' });
+  const [solutionGrid, setSolutionGrid] = useState([]);
 
   useEffect(() => {
     if (isMobile) {
       setShowMobileWarning(true);
     }
   }, []);
+
+  // Fetch smallest defect when grid size changes
+  useEffect(() => {
+    fetchSmallestDefect(gridSize).then(value => setSmallestDefect(value));
+  }, [gridSize]);
+
+  // Fetch solution info and grid when solution grid size changes
+  useEffect(() => {
+    const fetchSolutionInfo = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.BASE_URL}solutions.txt`);
+        const text = await response.text();
+        // Search for the line a(solutionGridSize)=value or a(solutionGridSize)<=value
+        const regexExact = new RegExp(`^a\\(${solutionGridSize}\\)=(\\d+)$`, 'm');
+        const regexUpperBound = new RegExp(`^a\\(${solutionGridSize}\\)<=(\\d+)$`, 'm');
+        
+        const matchExact = text.match(regexExact);
+        const matchUpperBound = text.match(regexUpperBound);
+        
+        let type = '';
+        let defect = '';
+        let author = '';
+        
+        if (matchExact) {
+          type = 'Optimal solution';
+          defect = matchExact[1];
+        } else if (matchUpperBound) {
+          type = 'Best known solution';
+          defect = matchUpperBound[1];
+        }
+        
+        // Determine author based on grid size
+        if (solutionGridSize >= 25 && solutionGridSize <= 57) {
+          author = 'by Robert Gerbicz';
+        } else if (solutionGridSize >= 58 && solutionGridSize <= 65) {
+          author = 'by Michel Gaillard';
+        } else if (solutionGridSize > 65) {
+          author = 'by Mia Müßig';
+        }
+        
+        setSolutionInfo({ type, defect, author });
+        
+        // Parse the solution grid from the text file
+        const lines = text.split('\n');
+        const startIndex = lines.findIndex(line => line.startsWith(`a(${solutionGridSize})`));
+        if (startIndex !== -1 && startIndex + solutionGridSize < lines.length) {
+          const gridLines = lines.slice(startIndex + 1, startIndex + 1 + solutionGridSize);
+          const grid = gridLines.map(line => line.split(''));
+          setSolutionGrid(grid);
+        } else {
+          setSolutionGrid([]);
+        }
+      } catch (error) {
+        console.error('Error fetching solution info:', error);
+        setSolutionInfo({ type: '', defect: '', author: '' });
+        setSolutionGrid([]);
+      }
+    };
+    
+    fetchSolutionInfo();
+  }, [solutionGridSize]);
 
   // Reset everything on grid size change
   useEffect(() => {
@@ -233,6 +314,14 @@ function App() {
     setShowResetModal(false);
   };
 
+  // Handle solution slider change
+  const handleSolutionSliderChange = (e) => {
+    setSolutionSliderValue(Number(e.target.value));
+  };
+  const handleSolutionSliderChangeEnd = () => {
+    setSolutionGridSize(solutionSliderValue);
+  };
+
   // Render 26 buttons in 13x2 grid
   const letterButtons = Array.from({ length: 26 }, (_, i) => {
     const letter = String.fromCharCode(65 + i);
@@ -250,7 +339,6 @@ function App() {
   });
 
   // Defect coloring uses hasCongruence
-  const smallestDefect = SMALLEST_DEFECT[gridSize] !== undefined ? SMALLEST_DEFECT[gridSize] : '-';
   return (
     <div className="container">
       {showMobileWarning && (
@@ -332,11 +420,65 @@ function App() {
       <div className="rules" style={{ background: '#f6f6f6', borderRadius: 10, padding: '0.8em 1.2em', margin: '0.5em auto 0 auto', maxWidth: 600 }}>
         <div style={{ color: '#333', fontSize: '0.98em', lineHeight: 1.45 }}>
           <p>
-            The <strong>Mondrian Art Problem</strong> is inspired by the abstract, geometric style of the Dutch painter <a href="https://en.wikipedia.org/wiki/Piet_Mondrian" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline' }}>Piet Mondrian</a>. Finding the minimal defect is challenging even with modern computers, with optimal values known only up to grid size 65, as detailed on the <a href='https://oeis.org/A276523' target='_blank' rel='noopener noreferrer' style={{ color: '#1976d2', textDecoration: 'underline' }}>OEIS</a>.
+            The <strong>Mondrian Art Problem</strong> is inspired by the abstract, geometric style of the Dutch painter <a href="https://en.wikipedia.org/wiki/Piet_Mondrian" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline' }}>Piet Mondrian</a>. Finding the minimal defect is challenging even with modern computers, already for grid size 67 the optimal defect is unknown.
           </p>
           <p>
             In collaboration with Natalia García-Colín, Dimitri Leemans, and Érika Roldán, I explored whether certain grid sizes allow for a <strong>perfect solution with defect 0</strong> in <a href="https://doi.org/10.1016/j.dam.2024.09.021" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline' }}>this research paper</a>.
           </p>
+        </div>
+      </div>
+      <h2 style={{ fontSize: '1.6em', fontWeight: 600, margin: '2em auto 0.5em auto', maxWidth: 600, color: '#222', textAlign: 'center', marginBottom: '0.7em' }}>Solutions</h2>
+      {solutionInfo.type && (
+        <div style={{ textAlign: 'center', marginBottom: '1em', fontSize: '1.1em', color: '#333', fontWeight: 500 }}>
+          {solutionInfo.type} with defect {solutionInfo.defect} {solutionInfo.author}
+        </div>
+      )}
+      <div className="game-area">
+        <div style={{
+          width: '600px',
+          height: '600px',
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: `repeat(${solutionGridSize}, 1fr)`,
+          gridTemplateRows: `repeat(${solutionGridSize}, 1fr)`,
+          gap: '0.5px',
+          background: 'rgba(0, 0, 0, 0.6)',
+          border: '1px solid rgba(0, 0, 0, 0.4)'
+        }}>
+          {Array.from({ length: solutionGridSize * solutionGridSize }).map((_, i) => {
+            const row = Math.floor(i / solutionGridSize);
+            const col = i % solutionGridSize;
+            let cellColor = '#fff';
+            
+            if (solutionGrid.length > 0 && solutionGrid[row] && solutionGrid[row][col]) {
+              const letter = solutionGrid[row][col];
+              if (letter >= 'a' && letter <= 'z') {
+                const colorIndex = letter.charCodeAt(0) - 97; // 'a' = 0, 'b' = 1, etc.
+                cellColor = BUTTON_COLORS[colorIndex % BUTTON_COLORS.length];
+              } else if (letter >= 'A' && letter <= 'Z') {
+                const colorIndex = letter.charCodeAt(0) - 65; // 'A' = 0, 'B' = 1, etc.
+                cellColor = BUTTON_COLORS[colorIndex % BUTTON_COLORS.length];
+              }
+            }
+            
+            return <div key={i} style={{ background: cellColor }} />;
+          })}
+        </div>
+      </div>
+      <div className="controls-bar" style={{ display: 'flex', alignItems: 'center', gap: '1.2em', justifyContent: 'center', marginTop: '1.5em' }}>
+        <div className="slider-area" style={{ display: 'flex', alignItems: 'center', gap: '1em' }}>
+          <input
+            id="solution-grid-size-slider"
+            type="range"
+            min="3"
+            max="96"
+            value={solutionSliderValue}
+            onChange={handleSolutionSliderChange}
+            onMouseUp={handleSolutionSliderChangeEnd}
+            onTouchEnd={handleSolutionSliderChangeEnd}
+            style={{ marginRight: '0.5em' }}
+          />
+          <div className="slider-label">Grid Size: {solutionSliderValue}</div>
         </div>
       </div>
       <div className="footer" style={{ marginTop: '2em', color: '#333', fontSize: '1em', textAlign: 'center' }}>
