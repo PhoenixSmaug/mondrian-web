@@ -441,9 +441,9 @@ function App() {
           display: 'grid',
           gridTemplateColumns: `repeat(${solutionGridSize}, 1fr)`,
           gridTemplateRows: `repeat(${solutionGridSize}, 1fr)`,
-          gap: '0.5px',
-          background: 'rgba(0, 0, 0, 0.6)',
-          border: '1px solid rgba(0, 0, 0, 0.4)'
+          gap: '1px',
+          background: 'rgba(0, 0, 0, 1)',
+          border: '1px solid rgba(0, 0, 0, 1)'
         }}>
           {Array.from({ length: solutionGridSize * solutionGridSize }).map((_, i) => {
             const row = Math.floor(i / solutionGridSize);
