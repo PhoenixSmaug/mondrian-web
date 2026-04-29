@@ -135,6 +135,9 @@ function App() {
 
   // Helper: get rectangle from cells
   function getRectFromCells(cells) {
+    if (!cells || cells.length === 0) {
+      return null;
+    }
     const coords = cells.map(id => id.split('-').map(Number));
     const rows = coords.map(([r]) => r);
     const cols = coords.map(([,c]) => c);
@@ -150,9 +153,25 @@ function App() {
     );
   }
 
+  function getPlacedRectangles(hist) {
+    return hist
+      .map(h => {
+        const rect = getRectFromCells(h.cells);
+        if (!rect) {
+          return null;
+        }
+        return {
+          ...rect,
+          area: h.cells.length,
+          letter: h.letter,
+        };
+      })
+      .filter(Boolean);
+  }
+
   // Check for congruence in history
   function checkHasCongruence(hist) {
-    const rects = hist.filter(h => h.cells.length > 1).map(h => ({...getRectFromCells(h.cells), letter: h.letter}));
+    const rects = getPlacedRectangles(hist);
     for (let i = 0; i < rects.length; ++i) {
       for (let j = i + 1; j < rects.length; ++j) {
         if (areRectsCongruent(rects[i], rects[j])) return {letters: [rects[i].letter, rects[j].letter]};
@@ -195,9 +214,7 @@ function App() {
   };
 
   // Compute defect: area difference between largest and smallest rectangle (only if at least 2 placed)
-  const rectAreas = history
-    .filter(h => h.cells.length > 1)
-    .map(h => h.cells.length);
+  const rectAreas = getPlacedRectangles(history).map(rect => rect.area);
   let defect = '-';
   if (rectAreas.length >= 2) {
     defect = Math.max(...rectAreas) - Math.min(...rectAreas);
